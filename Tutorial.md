@@ -106,3 +106,13 @@ until we bind a host port to an application port the applications are unusable
 docker run -p (desired host port):(known application port) (image name)
 
 ## Debugging Containers
+what if you wanted to get inside the terminal of a container and execute it directly?
+
+docker logs (container ID)
+
+you can use the --name argument on the run command to add a special name to container
+
+docker exec
+get the termninal of a running container
+
+docker exec (container ID)
