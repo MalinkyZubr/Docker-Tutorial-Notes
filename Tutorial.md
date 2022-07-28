@@ -90,6 +90,10 @@ display all docker images on the machine. All images have tags, or the version
 
 you will always see a port the container is operating on
 
+docker ps -a 
+
+this displays docker run history
+
 ## container port
 so how do you operate with two containers run on the same port without interfering?
 
@@ -115,4 +119,109 @@ you can use the --name argument on the run command to add a special name to cont
 docker exec
 get the termninal of a running container
 
-docker exec (container ID)
+docker exec -it (container ID) /bin/bash 
+
+this will get you ionto the container as a root user. you7 can also use the container name
+
+you can also do 
+`docker logs (container name)`
+
+to exit the terminal do exit
+
+## Workflow of Docker
+
+you are developiung a python app on the local environment. YOu need mongoDB
+
+so you download a docker container with mongo DB
+
+now you want to deploy the app on a development environment. You commit the app to git, that will trigger a jenkins build and produce artifacts from the applications. THen you can create a docker container. YOu can push it to a docker repository. Then it can be configured on a development server, which pulls from the private repository. Now you have your app and the mongo DB container running on the server in tandem. Now if another dev logs in, they can test the application
+
+so for our demo we will download a jodejs application and connect that to another container running mongodb
+
+ideally this will make things much easier to do
+
+so how can we use the docker containers to make the development process easier
+
+we will use mongo express,so we can see updates from our application and interact live with our database
+
+### DEocker network
+docker makes its isolated docker network where the contianers are deployed. When you deploy two in the same network they can interact just using the container name, because they are in the same network
+
+when we package our app in the network, it will package the mongo db and mongo express inside with it. 
+
+we can see our networks with `docker network ls`
+
+we can make a new one by doing `docker network create`
+
+to run the container in the network we have to give the network name or id
+
+we run the port, with -p, and set the name with --name
+
+we also need to consider environmental variables of the container before we run it
+
+you can specify root username and password, and the initial database, for mongo db as an example
+
+to call the mongodb database we give protocol and the ip:port
+
+## Compose
+what if we dont want to execute all those docker commands every time we want to run a container?
+
+we ave a tool that can do it. Docker compose
+
+we use YAML files  to store docker container compositions in them for each container
+
+we do not need to specify networks, because compose takes care of that for us
+
+### docker compose command
+docker-compose -f (filename).yaml up 
+up starts all the containers in the yaml
+
+note when you reconfigure a container, all the data in that container is LOST! 
+
+you want to have persistence, especially with databases. You will have volumes for that.
+
+to stop a composition of containers:
+
+docker-compose -f mongo.yaml down, stops all containers specified in the file. Also shuts down the network!
+
+## Dockerfile
+to deploy an app it needs to be containerized. Now we need to build that docker image. How do we do that? with the dockerfile
+
+we use jenkins to package the image, but we can also do it ourself
+
+so what is the dockerfile?
+
+the dockerfile contains application information and artifacts to configure the application while its being containerized. Its like a high level blueprint, or bill of materials. The syntax of a dockerfile is very simple.
+
+the image always starts with FROM (image) 
+where is the image deriving from? This is the base image
+
+we are going to have node installed in our image. When we start our container, we can see that the node command is available.
+
+next we set environment variables with
+
+`ENV (variables)`
+
+this will let us set environment variables from outside the image, so that every time we change something we dont need to rebuild it
+
+then `RUN`
+
+this allows you to run any linux command
+
+`RUN mkdir -p /home/app` : creates a file that will live in the container environment
+
+`COPY . /home/app` : you can copy from your host to the container
+
+`CMD ['node', 'server.js']` : this is an entry point linux command
+
+CMD marks the start of the program to run the server
+
+### docker stack of our app
+
+app:1.0
+^
+|
+node:13-alpine
+^
+|
+alpine:3.10
